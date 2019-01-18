@@ -1,11 +1,5 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
-	"time"
-)
-
 type BlockChain struct {
 	blocks []*Block
 }
@@ -16,7 +10,7 @@ func NewBlockChain() *BlockChain {
 }
 
 func (bc *BlockChain) AddBlock(data string) {
-	prevBlockHash = bc.blocks[len(bc.blocks)-1].Hash
+	prevBlockHash := bc.blocks[len(bc.blocks)-1].Hash
 	block := NewBlock(data, prevBlockHash)
 	bc.blocks = append(bc.blocks, block)
 }
