@@ -11,13 +11,14 @@ import (
 func IntToByte(num int64) []byte {
 	var buffer bytes.Buffer
 	err := binary.Write(&buffer, binary.BigEndian, num)
-	CheckErr(err)
+	CheckErr("IntToByte", err)
 	return buffer.Bytes()
 }
 
-func CheckErr(err error) {
+func CheckErr(info string, err error) {
 	if err != nil {
-		fmt.Println("err occur: ", err)
+
+		fmt.Println(info, " err occur: ", err)
 		os.Exit(1)
 	}
 }
