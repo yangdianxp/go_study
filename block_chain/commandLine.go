@@ -7,15 +7,17 @@ import (
 )
 
 const usage = `
+	createChain --address ADDRESS	"create a blockchain"
 	addBlock --data DATA            "add a block to blockchain"
 	printChain						"print all blocks"
 `
 
 const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
+const CreateChainCmdString = "createChain"
 
 type CLI struct {
-	bc *BlockChain
+	//bc *BlockChain
 }
 
 func (cli *CLI)printUsage()  {
@@ -33,26 +35,37 @@ func (cli *CLI)parameterCheck()  {
 func (cli *CLI)Run()  {
 	cli.parameterCheck()
 	addBlockCmd := flag.NewFlagSet(AddBlockCmdString, flag.ExitOnError)
+	createChainCmd := flag.NewFlagSet(CreateChainCmdString, flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet(PrintChainCmdString, flag.ExitOnError)
 
 	addBlockCmdPara := addBlockCmd.String("data", "", "block transaction info!")
+	createChainCmdPara := createChainCmd.String("address", "", "address info!")
 
 	switch os.Args[1] {
+	case CreateChainCmdString:
+		err := createChainCmd.Parse(os.Args[2:])
+		CheckErr("Run1()", err)
+		if createChainCmd.Parsed() {
+			if *createChainCmdPara == "" {
+				cli.printUsage()
+			}
+			cli.CreateChain(*createChainCmdPara)
+		}
 	case AddBlockCmdString:
 		err := addBlockCmd.Parse(os.Args[2:])
-		CheckErr("Run()", err)
+		CheckErr("Run2()", err)
 		if addBlockCmd.Parsed() {
 			if *addBlockCmdPara == "" {
 				cli.printUsage()
 			}
-			cli.AddBlock(*addBlockCmdPara)
+			//cli.AddBlock(*addBlockCmdPara)
 		}
 
 	case PrintChainCmdString:
 		err := printChainCmd.Parse(os.Args[2:])
-		CheckErr("Run2()", err)
+		CheckErr("Run3()", err)
 		if printChainCmd.Parsed() {
-			cli.PrintChain()
+			//cli.PrintChain()
 		}
 	default:
 		cli.printUsage()
