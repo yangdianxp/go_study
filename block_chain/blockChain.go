@@ -2,6 +2,7 @@ package main
 
 import (
 	"bolt"
+	"os"
 )
 
 const dbFile = "blockChain.db"
@@ -15,14 +16,14 @@ type BlockChain struct {
 }
 
 func NewBlockChain() *BlockChain {
-	db, err := bolt.Open(dbFile, mode:0x0600, nil)
+	db, err := bolt.Open(dbFile, 0600, nil)
 	CheckErr("NewBlockChain1", err)
 	
 	var lastHash []byte
 	db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket != nil {
-			lastHash = bucket.Get(byte[](lastHashKey))
+			lastHash = bucket.Get([]byte(lastHashKey))
 		} else {
 			genesis := NewGenesisBlock()
 			bucket, err := tx.CreateBucket([]byte(blockBucket))
@@ -40,13 +41,56 @@ func NewBlockChain() *BlockChain {
 }
 
 func (bc *BlockChain) AddBlock(data string) {
-	prevBlockHash := bc.blocks[len(bc.blocks)-1].Hash
+	var prevBlockHash []byte
+
+	bc.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			os.Exit(1)
+		}
+
+		prevBlockHash = bucket.Get([]byte(lastHashKey))
+		return nil
+	})
 	block := NewBlock(data, prevBlockHash)
-	bc.blocks = append(bc.blocks, block)
+	err3 := bc.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			os.Exit(1)
+		}
+
+		err1 := bucket.Put(block.Hash, block.Serialize())
+		CheckErr("AddBlock1", err1)
+		err2 := bucket.Put([]byte(lastHashKey), block.Hash)
+		CheckErr("AddBlock2", err2)
+		bc.tail = block.Hash
+		return nil
+	})
+	CheckErr("AddBlock3", err3)
 }
 
 //迭代器
-//type BlockChainIterator struct {
-//	currHash []byte
-//	db *bolt
-//}
+type BlockChainIterator struct {
+	currHash []byte
+	db *bolt.DB
+}
+
+func (bc *BlockChain)NewIterator() *BlockChainIterator {
+	return &BlockChainIterator{currHash:bc.tail, db:bc.db}
+}
+
+func (it *BlockChainIterator)Next() (block *Block) {
+	err := it.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			return nil
+		}
+
+		data := bucket.Get(it.currHash)
+		block = Deserialize(data)
+		it.currHash = block.PrevBlockHash
+		return nil
+	})
+	CheckErr("Next()", err)
+	return
+}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"time"
 )
 
@@ -25,7 +27,7 @@ type Block struct {
 }
 
 func (block *Block) Serialize() []byte {
-	var buffer byte.Buffer
+	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	err := encoder.Encode(block)
 	CheckErr("Serialize", err)
