@@ -58,14 +58,14 @@ func (cli *CLI)Run()  {
 			if *addBlockCmdPara == "" {
 				cli.printUsage()
 			}
-			//cli.AddBlock(*addBlockCmdPara)
+			cli.AddBlock(*addBlockCmdPara)
 		}
 
 	case PrintChainCmdString:
 		err := printChainCmd.Parse(os.Args[2:])
 		CheckErr("Run3()", err)
 		if printChainCmd.Parsed() {
-			//cli.PrintChain()
+			cli.PrintChain()
 		}
 	default:
 		cli.printUsage()

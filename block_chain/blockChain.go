@@ -2,6 +2,7 @@ package main
 
 import (
 	"bolt"
+	"fmt"
 	"os"
 )
 
@@ -11,30 +12,58 @@ const lastHashKey = "key"
 
 type BlockChain struct {
 	//数据库操作句柄
-	db *bolt.DB
+	db   *bolt.DB
 	tail []byte
 }
 
-func NewBlockChain() *BlockChain {
+func InitBlockChain() *BlockChain {
+	if isDBExist() {
+		fmt.Println("blockchain exist already, no need to create!")
+		os.Exit(1)
+	}
+
 	db, err := bolt.Open(dbFile, 0600, nil)
-	CheckErr("NewBlockChain1", err)
-	
+	CheckErr("InitBlockChain", err)
+
 	var lastHash []byte
 	db.Update(func(tx *bolt.Tx) error {
+		genesis := NewGenesisBlock()
+		bucket, err := tx.CreateBucket([]byte(blockBucket))
+		CheckErr("InitBlockChain1", err)
+		err1 := bucket.Put(genesis.Hash, genesis.Serialize()) //TODO
+		CheckErr("InitBlockChain2", err1)
+		err2 := bucket.Put([]byte(lastHashKey), genesis.Hash)
+		CheckErr("InitBlockChain3", err2)
+		lastHash = genesis.Hash
+
+		return nil
+	})
+	return &BlockChain{db, lastHash}
+}
+
+func isDBExist() bool  {
+	_, err := os.Stat(dbFile)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func GetBlockChainHandler() *BlockChain {
+	if !isDBExist() {
+		fmt.Println("Please create blockchain first!")
+		os.Exit(1)
+	}
+	db, err := bolt.Open(dbFile, 0600, nil)
+	CheckErr("GetBlockChainHandler", err)
+
+	var lastHash []byte
+	db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket != nil {
 			lastHash = bucket.Get([]byte(lastHashKey))
-		} else {
-			genesis := NewGenesisBlock()
-			bucket, err := tx.CreateBucket([]byte(blockBucket))
-			CheckErr("NewBlockChain2", err)
-			err1 := bucket.Put(genesis.Hash, genesis.Serialize())//TODO
-			CheckErr("NewBlockChain3", err1)
-			err2 := bucket.Put([]byte(lastHashKey), genesis.Hash)
-			CheckErr("NewBlockChain4", err2)
-			lastHash = genesis.Hash
 		}
-		
+
 		return nil
 	})
 	return &BlockChain{db, lastHash}
@@ -72,14 +101,14 @@ func (bc *BlockChain) AddBlock(data string) {
 //迭代器
 type BlockChainIterator struct {
 	currHash []byte
-	db *bolt.DB
+	db       *bolt.DB
 }
 
-func (bc *BlockChain)NewIterator() *BlockChainIterator {
-	return &BlockChainIterator{currHash:bc.tail, db:bc.db}
+func (bc *BlockChain) NewIterator() *BlockChainIterator {
+	return &BlockChainIterator{currHash: bc.tail, db: bc.db}
 }
 
-func (it *BlockChainIterator)Next() (block *Block) {
+func (it *BlockChainIterator) Next() (block *Block) {
 	err := it.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {
