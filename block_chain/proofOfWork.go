@@ -34,7 +34,8 @@ func (pow *ProofOfWrok) PrepareData(nonce int64) []byte {
 		IntToByte(block.TimeStamp),
 		IntToByte(targetBits),
 		IntToByte(nonce),
-		block.Data}
+		//block.Transactions.TransactionHash() //TODO
+	}
 	data := bytes.Join(temp, []byte{})
 	return data
 }

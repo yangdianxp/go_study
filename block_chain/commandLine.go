@@ -9,6 +9,8 @@ import (
 const usage = `
 	createChain --address ADDRESS	"create a blockchain"
 	addBlock --data DATA            "add a block to blockchain"
+	send --from FROM --to TO --amount AMOUNT	"send coin from FROM to TO"
+	getbalance --address ADRESS		"get balance of the addressd"
 	printChain						"print all blocks"
 `
 

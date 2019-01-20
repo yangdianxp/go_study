@@ -9,6 +9,7 @@ import (
 const dbFile = "blockChain.db"
 const blockBucket = "bucket"
 const lastHashKey = "key"
+const genesisInfo = "genesisInfo"
 
 type BlockChain struct {
 	//数据库操作句柄
@@ -16,7 +17,7 @@ type BlockChain struct {
 	tail []byte
 }
 
-func InitBlockChain() *BlockChain {
+func InitBlockChain(address string) *BlockChain {
 	if isDBExist() {
 		fmt.Println("blockchain exist already, no need to create!")
 		os.Exit(1)
@@ -27,7 +28,8 @@ func InitBlockChain() *BlockChain {
 
 	var lastHash []byte
 	db.Update(func(tx *bolt.Tx) error {
-		genesis := NewGenesisBlock()
+		coinbase := NewCoinbaseTx(address, genesisInfo)
+		genesis := NewGenesisBlock(coinbase)
 		bucket, err := tx.CreateBucket([]byte(blockBucket))
 		CheckErr("InitBlockChain1", err)
 		err1 := bucket.Put(genesis.Hash, genesis.Serialize()) //TODO
@@ -69,7 +71,7 @@ func GetBlockChainHandler() *BlockChain {
 	return &BlockChain{db, lastHash}
 }
 
-func (bc *BlockChain) AddBlock(data string) {
+func (bc *BlockChain) AddBlock(txs []*Transaction) {
 	var prevBlockHash []byte
 
 	bc.db.View(func(tx *bolt.Tx) error {
@@ -81,7 +83,7 @@ func (bc *BlockChain) AddBlock(data string) {
 		prevBlockHash = bucket.Get([]byte(lastHashKey))
 		return nil
 	})
-	block := NewBlock(data, prevBlockHash)
+	block := NewBlock(txs, prevBlockHash)
 	err3 := bc.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {
@@ -122,4 +124,38 @@ func (it *BlockChainIterator) Next() (block *Block) {
 	})
 	CheckErr("Next()", err)
 	return
+}
+
+//返回指定地址能够支配的utxo的交易集合
+func (bc *BlockChain)FindUTXOTransactions(address string) []Transaction  {
+	//包含目标utxo的交易集合
+	var UTXOTransactions []Transaction
+	//存储使用过的utxo的集合 map[交易id] int64
+	var
+	it := bc.NewIterator()
+	for {
+		//遍历区块
+		block := it.Next()
+		//遍历交易
+		//目的： 找到所有能支配utxo
+		for _, tx := range block.Transactions{
+			//遍历output
+			for _, output := range tx.TXOutputs{
+				//如果当前地址是这个utxo的所有者，就满足条件
+				if output.CanBeUnlockedWith(address){
+					UTXOTransactions = append(UTXOTransactions, *tx)
+				}
+			}
+		}
+		//遍历input
+		//目的： 找到已经消耗的utxo， 把它们放到一个集合里
+		//需要两个字段来标识使用过的utxo: a. 交易ID， b.output的索引
+		for _, input := range tx.TXInputs{
+
+		}
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+	return UTXOTransactions
 }

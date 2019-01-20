@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func (cli *CLI) AddBlock(data string) {
-	bc := GetBlockChainHandler()
-	bc.AddBlock(data)
+	//bc := GetBlockChainHandler()
+	//bc.AddBlock(data) //TODO
 }
 
 func (cli *CLI) PrintChain() {
@@ -18,7 +18,7 @@ func (cli *CLI) PrintChain() {
 		fmt.Printf("TimeStamp: %d\n", block.TimeStamp)
 		fmt.Printf("Bits: %x\n", block.Bits)
 		fmt.Printf("Nonce: %d\n", block.Nonce)
-		fmt.Printf("Data: %s\n", block.Data)
+		//fmt.Printf("Data: %s\n", block.Data) //TODO
 		fmt.Printf("Isvalid: %v\n", NewProofOfWork(block).IsValid())
 
 		if len(block.PrevBlockHash) == 0 {
@@ -29,7 +29,7 @@ func (cli *CLI) PrintChain() {
 }
 
 func (cli *CLI)CreateChain(address string)  {
-	bc := InitBlockChain()
+	bc := InitBlockChain(address)
 	defer bc.db.Close()
 	fmt.Println("Create blockchain successfully")
 }

@@ -23,7 +23,7 @@ type Block struct {
 	Nonce int64
 
 	//交易信息
-	Data []byte
+	Transactions []*Transaction
 }
 
 func (block *Block) Serialize() []byte {
@@ -46,7 +46,7 @@ func Deserialize(data []byte) *Block {
 	return &block
 }
 
-func NewBlock(data string, preBlockHash []byte) *Block {
+func NewBlock(txs []*Transaction, preBlockHash []byte) *Block {
 	var block Block
 	block = Block{
 		Version:       1,
@@ -56,7 +56,7 @@ func NewBlock(data string, preBlockHash []byte) *Block {
 		TimeStamp:  time.Now().Unix(),
 		Bits:       targetBits,
 		Nonce:      0,
-		Data:       []byte(data)}
+		Transactions: txs}
 
 	//block.SetHash()
 	pow := NewProofOfWork(&block)
@@ -66,6 +66,6 @@ func NewBlock(data string, preBlockHash []byte) *Block {
 	return &block
 }
 
-func NewGenesisBlock() *Block {
-	return NewBlock("Genesis Block!", []byte{})
+func NewGenesisBlock(coinbase *Transaction) *Block {
+	return NewBlock([]*Transaction{coinbase}, []byte{})
 }
