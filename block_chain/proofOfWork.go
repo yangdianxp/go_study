@@ -27,6 +27,7 @@ func NewProofOfWork(block *Block) *ProofOfWrok {
 
 func (pow *ProofOfWrok) PrepareData(nonce int64) []byte {
 	block := pow.block
+	copy(block.MerKelRoot, block.HashTransactions())
 	temp := [][]byte{
 		IntToByte(block.Version),
 		block.PrevBlockHash,
@@ -34,7 +35,6 @@ func (pow *ProofOfWrok) PrepareData(nonce int64) []byte {
 		IntToByte(block.TimeStamp),
 		IntToByte(targetBits),
 		IntToByte(nonce),
-		//block.Transactions.TransactionHash() //TODO
 	}
 	data := bytes.Join(temp, []byte{})
 	return data

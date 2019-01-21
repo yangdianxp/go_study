@@ -2,11 +2,6 @@ package main
 
 import "fmt"
 
-func (cli *CLI) AddBlock(data string) {
-	//bc := GetBlockChainHandler()
-	//bc.AddBlock(data) //TODO
-}
-
 func (cli *CLI) PrintChain() {
 	bc := GetBlockChainHandler()
 	defer bc.db.Close()
@@ -19,7 +14,6 @@ func (cli *CLI) PrintChain() {
 		fmt.Printf("TimeStamp: %d\n", block.TimeStamp)
 		fmt.Printf("Bits: %x\n", block.Bits)
 		fmt.Printf("Nonce: %d\n", block.Nonce)
-		//fmt.Printf("Data: %s\n", block.Data) //TODO
 		fmt.Printf("Isvalid: %v\n", NewProofOfWork(block).IsValid())
 
 		if len(block.PrevBlockHash) == 0 {
@@ -47,4 +41,12 @@ func (cli *CLI)GetBalance(address string) {
 		total += utxo.Value
 	}
 	fmt.Printf("The balance of %s is %f\n", address, total)
+}
+
+func (cli *CLI)Send(from, to string, amount float64)  {
+	bc := GetBlockChainHandler()
+	defer bc.db.Close()
+	tx := NewTransaction(from , to, amount, bc)
+	bc.AddBlock([]*Transaction{tx})
+	fmt.Println("send successfully!")
 }

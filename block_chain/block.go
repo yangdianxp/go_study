@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"time"
 )
@@ -51,7 +52,6 @@ func NewBlock(txs []*Transaction, preBlockHash []byte) *Block {
 	block = Block{
 		Version:       1,
 		PrevBlockHash: preBlockHash,
-		//Hash TODO
 		MerKelRoot: []byte{},
 		TimeStamp:  time.Now().Unix(),
 		Bits:       targetBits,
@@ -68,4 +68,18 @@ func NewBlock(txs []*Transaction, preBlockHash []byte) *Block {
 
 func NewGenesisBlock(coinbase *Transaction) *Block {
 	return NewBlock([]*Transaction{coinbase}, []byte{})
+}
+
+//粗略模拟梅克尔树， 将交易的哈希值进行拼接，生成root hash
+func (block *Block)HashTransactions() []byte  {
+	var txHashes [][]byte
+	txs := block.Transactions
+	for _,tx := range txs{
+									//[]byte
+		txHashes = append(txHashes, tx.TXID)
+	}
+	//对二维切片进行拼接，生成一维切片
+	data := bytes.Join(txHashes, []byte{})
+	hash /*[32]byte*/:= sha256.Sum256(data)
+	return hash[:]
 }
