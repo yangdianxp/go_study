@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+	"os"
 )
 
 const reward = 12.5
@@ -66,6 +67,25 @@ func NewCoinbaseTx(address string, data string) *Transaction {
 	return &tx
 }
 
-//func NewTransaction(from string, to string, amount float64, bc *BlockChain)  {
-//
-//}
+func (tx *Transaction)IsCoinbase() bool {
+	if len(tx.TXInputs) == 1{
+		if len(tx.TXInputs[0].TXID) == 0 && tx.TXInputs[0].Vout == -1 {
+			return true
+		}
+	}
+	return false
+}
+
+//创建普通交易send的辅助函数
+func NewTransaction(from string, to string, amount float64, bc *BlockChain) *Transaction {
+	vaidUTXOs/*所需要的，合理的utxo的集合*/, total/*返回utxo的金额总和*/ := bc.FindSuitableUTXOs(from, amount)
+	if total < amount {
+		fmt.Println("Not enough money!")
+		os.Exit(1)
+	}
+	//进行output到input的转换
+	
+	tx := Transaction{[]byte{}, []TXInput{input}, []TXOutput{output}}
+	tx.SetTXID()
+	return &tx
+}

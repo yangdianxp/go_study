@@ -10,13 +10,14 @@ const usage = `
 	createChain --address ADDRESS	"create a blockchain"
 	addBlock --data DATA            "add a block to blockchain"
 	send --from FROM --to TO --amount AMOUNT	"send coin from FROM to TO"
-	getbalance --address ADRESS		"get balance of the addressd"
+	getBalance --address ADRESS		"get balance of the addressd"
 	printChain						"print all blocks"
 `
 
 const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
 const CreateChainCmdString = "createChain"
+const GetBalanceCmdString = "getBalance"
 
 type CLI struct {
 	//bc *BlockChain
@@ -38,10 +39,12 @@ func (cli *CLI)Run()  {
 	cli.parameterCheck()
 	addBlockCmd := flag.NewFlagSet(AddBlockCmdString, flag.ExitOnError)
 	createChainCmd := flag.NewFlagSet(CreateChainCmdString, flag.ExitOnError)
+	getBalanceCmd := flag.NewFlagSet(GetBalanceCmdString, flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet(PrintChainCmdString, flag.ExitOnError)
 
 	addBlockCmdPara := addBlockCmd.String("data", "", "block transaction info!")
 	createChainCmdPara := createChainCmd.String("address", "", "address info!")
+	getBalanceCmdPara := getBalanceCmd.String("address", "", "address info!")
 
 	switch os.Args[1] {
 	case CreateChainCmdString:
@@ -62,7 +65,15 @@ func (cli *CLI)Run()  {
 			}
 			cli.AddBlock(*addBlockCmdPara)
 		}
-
+	case GetBalanceCmdString:
+		err := getBalanceCmd.Parse(os.Args[2:])
+		CheckErr("Run4()", err)
+		if getBalanceCmd.Parsed() {
+			if *getBalanceCmdPara == "" {
+				cli.printUsage()
+			}
+			cli.GetBalance(*getBalanceCmdPara)
+		}
 	case PrintChainCmdString:
 		err := printChainCmd.Parse(os.Args[2:])
 		CheckErr("Run3()", err)

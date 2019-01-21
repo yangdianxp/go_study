@@ -130,8 +130,9 @@ func (it *BlockChainIterator) Next() (block *Block) {
 func (bc *BlockChain)FindUTXOTransactions(address string) []Transaction  {
 	//包含目标utxo的交易集合
 	var UTXOTransactions []Transaction
-	//存储使用过的utxo的集合 map[交易id] int64
-	var
+	//存储使用过的utxo的集合 map[交易id] []int64
+	//0x111111 : 0, 1 都是给Alice转账
+	spentUTXO := make(map[string][]int64)
 	it := bc.NewIterator()
 	for {
 		//遍历区块
@@ -139,23 +140,59 @@ func (bc *BlockChain)FindUTXOTransactions(address string) []Transaction  {
 		//遍历交易
 		//目的： 找到所有能支配utxo
 		for _, tx := range block.Transactions{
+			//遍历input
+			//目的： 找到已经消耗的utxo， 把它们放到一个集合里
+			//需要两个字段来标识使用过的utxo: a. 交易ID， b.output的索引
+			if !tx.IsCoinbase() {
+				for _, input := range tx.TXInputs{
+					if input.CanUnlockUTXOWith(address) {
+						//map[txid] []int64
+						spentUTXO[string(tx.TXID)] = append(spentUTXO[string(tx.TXID)], input.Vout)
+					}
+				}
+			}
+		OUTPUTS:
 			//遍历output
-			for _, output := range tx.TXOutputs{
+			//目的：找到所有能支配utxo
+			for currIndex, output := range tx.TXOutputs{
+				//检查当前的output是否已经被消耗，如果消耗过，那么就进行下一个output检验
+				if spentUTXO[string(tx.TXID)] != nil{
+					//非空，代表当前交易里面有消耗的utxo
+					indexes := spentUTXO[string(tx.TXID)]
+					for _, index := range indexes {
+						//当前的索引和消耗的索引比较，若相同，表明这个utxo肯定被消耗了，直接跳过，进行下一个output的判断
+						if int64(currIndex) == index {
+							continue OUTPUTS
+						}
+					}
+				}
 				//如果当前地址是这个utxo的所有者，就满足条件
 				if output.CanBeUnlockedWith(address){
 					UTXOTransactions = append(UTXOTransactions, *tx)
 				}
 			}
 		}
-		//遍历input
-		//目的： 找到已经消耗的utxo， 把它们放到一个集合里
-		//需要两个字段来标识使用过的utxo: a. 交易ID， b.output的索引
-		for _, input := range tx.TXInputs{
 
-		}
 		if len(block.PrevBlockHash) == 0 {
 			break
 		}
 	}
 	return UTXOTransactions
+}
+
+//寻找指定地址能够使用的utxo
+func (bc *BlockChain)FindUTXO(address string) []*TXOutput {
+	var UTXOs []*TXOutput
+	txs := bc.FindUTXOTransactions(address)
+	//遍历交易
+	for _, tx := range txs {
+		//遍历output
+		for _, utxo := range tx.TXOutputs {
+			//当前地址拥有的utxo
+			if utxo.CanBeUnlockedWith(address) {
+				UTXOs = append(UTXOs, &utxo)
+			}
+		}
+	}
+	return UTXOs
 }
