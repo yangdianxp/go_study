@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main()  {
-	aesTest()
+	HashTest()
 }
 
 // 测试des的加解密
@@ -36,4 +36,24 @@ func aesTest()  {
 	fmt.Println("加密之后的密文： " + string(str))
 	str = decryptAES(str, key)
 	fmt.Println("解密之后的明文： " + string(str))
+}
+
+// 测试RSA的加密和解密测试
+func RsaTest() {
+	err := RsaGenKey(4086)
+	fmt.Println("错误信息：", err)
+
+	// 加密
+	src := []byte("少壮不努力，老大徒伤悲。")
+	data, err := RsaPublicEncrypt(src, "public.pem")
+	// 解密
+	data, err = RsaPrivateDecrypt(data, "private.pem")
+	fmt.Println("解密之后的明文： " + string(data))
+}
+
+// 哈希算法测试
+func HashTest()  {
+	data := []byte("少壮不努力，老大徒伤悲。")
+	fmt.Println("md5sum:", GetMd5Str_1(data))
+	fmt.Println("md5sum:", GetMd5Str_2(data))
 }
