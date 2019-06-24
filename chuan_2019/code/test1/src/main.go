@@ -2,6 +2,15 @@ package main
 
 import "fmt"
 
-func maint()  {
-	 fmt.Println("Hello World!")
+func main()  {
+	fmt.Println("Google" + "Runoob")
 }
+
+/*
+
+
+
+fmt.Println("Hello World!")
+
+
+ */
