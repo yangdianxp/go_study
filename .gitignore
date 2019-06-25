@@ -3,3 +3,4 @@
 *.exe
 block
 *.db
+workspace.xml
