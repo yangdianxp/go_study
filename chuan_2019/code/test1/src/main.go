@@ -2,6 +2,108 @@ package main
 
 import "fmt"
 
+func main()  {
+	nums := []int{2, 3, 4}
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	fmt.Println("sum:", sum)
+	for i, num := range nums {
+		if num == 3 {
+			fmt.Println("index:", i)
+		}
+	}
+	kvs := map[string]string{"a": "apple", "b": "banana"}
+	for k, v := range kvs {
+		fmt.Printf("%s -> %s\n", k, v)
+	}
+
+	for i, c := range "go" {
+		fmt.Println(i, c)
+	}
+}
+
+/*
+{
+func printSlice(x []int)  {
+	fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x)
+}
+
+	var numbers []int
+	printSlice(numbers)
+
+	numbers = append(numbers, 0)
+	printSlice(numbers)
+
+	numbers = append(numbers, 1)
+	printSlice(numbers)
+
+	numbers = append(numbers, 2, 3, 4)
+	printSlice(numbers)
+
+	numbers1 := make([]int, len(numbers), (cap(numbers) * 2))
+
+	copy(numbers1, numbers)
+	printSlice(numbers1)
+}
+
+{
+
+
+	numbers := []int{0,1,2,3,4,5,6,7,8}
+	printSlice(numbers)
+
+	fmt.Println("numbers ==", numbers)
+	fmt.Println("numbers[1:4] ==", numbers[1:4])
+	fmt.Println("numbers[:3] ==", numbers[:3])
+	fmt.Println("numbers[4:] ==", numbers[4:])
+
+	numbers1 := make([]int, 0, 5)
+	printSlice(numbers1)
+
+	number2 := numbers[:2]
+	printSlice(number2)
+
+	number3 := numbers[2:5]
+	printSlice(number3)
+
+}
+
+{
+	var numbers []int
+	printSlice(numbers)
+
+	if numbers == nil {
+		fmt.Printf("切处是空的")
+	}
+}
+
+{
+func main() {
+	var numbers = make([]int, 3, 5)
+	printSlice(numbers)
+
+}
+
+	fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x)
+}
+
+{
+type Rect struct {
+	x, y float64
+	width, height float64
+}
+
+func (r *Rect) Area() float64 {
+	return r.width * r.height
+}
+
+	rect := Rect{1, 2, 3, 4}
+	fmt.Println(rect.Area())
+}
+
+{
 type Books struct {
 	title string
 	author string
@@ -9,7 +111,33 @@ type Books struct {
 	book_id int
 }
 
-func main() {
+func changeBook(book *Books) {
+	book.title = "book1_change"
+}
+
+	var book1 Books
+	book1.title = "book1"
+	book1.author = "zuozhe"
+	book1.book_id = 1
+	changeBook(&book1)
+	fmt.Println(book1)
+}
+
+{
+type Books struct {
+	title string
+	author string
+	subject string
+	book_id int
+}
+
+func printBook( book *Books)  {
+	fmt.Printf("Book title : %s\n", book.title)
+	fmt.Printf("Book author : %s\n", book.author)
+	fmt.Printf("Book subject : %s\n", book.subject)
+	fmt.Printf("Book book_id : %d\n", book.book_id)
+}
+
 	var Book1 Books
 	var Book2 Books
 
@@ -23,18 +151,10 @@ func main() {
 	Book2.subject = "Python 语言教程"
 	Book2.book_id = 6495700
 
-	printBook(Book1)
-	printBook(Book2)
+	printBook(&Book1)
+	printBook(&Book2)
 }
 
-func printBook( book Books)  {
-	fmt.Printf("Book title : %s\n", book.title)
-	fmt.Printf("Book author : %s\n", book.author)
-	fmt.Printf("Book subject : %s\n", book.subject)
-	fmt.Printf("Book book_id : %d\n", book.book_id)
-}
-
-/*
 {
 func printBook( book Books)  {
 	fmt.Printf("Book title : %s\n", book.title)
