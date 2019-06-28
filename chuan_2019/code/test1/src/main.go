@@ -2,7 +2,153 @@ package main
 
 import "fmt"
 
-func main()  {
+func fibonacci(n int, c chan int) {
+	x, y := 0, 1
+	for i := 0; i < n; i++ {
+		c <- x
+		x, y = y, x+y
+	}
+	close(c)
+}
+
+func main() {
+	c := make(chan int, 10)
+	go fibonacci(cap(c), c)
+	for i := range c {
+		fmt.Println((i))
+	}
+}
+
+/*
+{
+	ch := make(chan int, 2)
+	ch <- 1
+	ch <- 2
+
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+
+{
+func sum(s []int, c chan int) {
+	sum := 0
+	for _, v := range s {
+		sum += v
+	}
+	c <- sum
+}
+
+	s := []int{7, 2, 8, -9, 4, 0}
+
+	c := make(chan int)
+	go sum(s[:len(s)/2], c)
+	go sum(s[len(s)/2:], c)
+
+	x, y := <-c, <-c
+	fmt.Println(x, y, x+y)
+}
+
+{
+func say(s string)  {
+	for i := 0; i < 5; i++ {
+		time.Sleep(100 * time.Microsecond)
+		fmt.Println(s)
+	}
+}
+
+	go say("world")
+	say("hello")
+}
+
+{
+type Phone interface {
+	call()
+}
+
+type NokiaPhone struct {
+
+}
+
+func (nokiaPhone NokiaPhone)call() {
+	fmt.Println("I am Nokia, I can call you!")
+}
+
+type IPhone struct {
+
+}
+
+func (iPhone IPhone) call()  {
+	fmt.Println("I am iPhone, I can call you!")
+}
+
+	var phone Phone
+	phone = new(NokiaPhone)
+	phone.call()
+
+	phone = new(IPhone)
+	phone.call()
+}
+
+{
+	var sum int = 17
+	var count int = 5
+	var mean float32
+
+	mean = float32(sum) / float32(count)
+	fmt.Printf("mean 的值为：%f\n", mean)
+}
+
+{
+func Factorial(n uint64)(result uint64)  {
+	if n > 0 {
+		result = n * Factorial(n-1)
+		return result
+	}
+	return 1
+}
+
+	var i int = 15
+	fmt.Printf("%d 的阶乘是 %d\n", i, Factorial(uint64(i)))
+}
+
+{
+	countryCapitalMap := map[string]string{"France": "Paris", "Italy": "Rome", "Japan":"Tokyo", "India":"New delhi"}
+	fmt.Println("原始地图")
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+
+	delete(countryCapitalMap, "France")
+	fmt.Println("法国条目被删除")
+	fmt.Println("删除元素后地图")
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+}
+
+{
+	var countryCapitalMap map[string]string
+	countryCapitalMap = make(map[string]string)
+	countryCapitalMap["France"] = "巴黎"
+	countryCapitalMap["Italy"] = "罗马"
+	countryCapitalMap["Japan"] = "东京"
+	countryCapitalMap["India"] = "新德里"
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+
+	capital, ok := countryCapitalMap["American"]
+	if ok {
+		fmt.Println("American 的首都是", capital)
+	} else {
+		fmt.Println("American 的首都不存在")
+	}
+}
+
+{
 	nums := []int{2, 3, 4}
 	sum := 0
 	for _, num := range nums {
@@ -24,7 +170,6 @@ func main()  {
 	}
 }
 
-/*
 {
 func printSlice(x []int)  {
 	fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x)
