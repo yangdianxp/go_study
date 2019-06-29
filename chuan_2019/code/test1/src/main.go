@@ -2,6 +2,253 @@ package main
 
 import "fmt"
 
+func fibonacci(n int, c chan int) {
+	x, y := 0, 1
+	for i := 0; i < n; i++ {
+		c <- x
+		x, y = y, x+y
+	}
+	close(c)
+}
+
+func main() {
+	c := make(chan int, 10)
+	go fibonacci(cap(c), c)
+	for i := range c {
+		fmt.Println((i))
+	}
+}
+
+/*
+{
+	ch := make(chan int, 2)
+	ch <- 1
+	ch <- 2
+
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+
+{
+func sum(s []int, c chan int) {
+	sum := 0
+	for _, v := range s {
+		sum += v
+	}
+	c <- sum
+}
+
+	s := []int{7, 2, 8, -9, 4, 0}
+
+	c := make(chan int)
+	go sum(s[:len(s)/2], c)
+	go sum(s[len(s)/2:], c)
+
+	x, y := <-c, <-c
+	fmt.Println(x, y, x+y)
+}
+
+{
+func say(s string)  {
+	for i := 0; i < 5; i++ {
+		time.Sleep(100 * time.Microsecond)
+		fmt.Println(s)
+	}
+}
+
+	go say("world")
+	say("hello")
+}
+
+{
+type Phone interface {
+	call()
+}
+
+type NokiaPhone struct {
+
+}
+
+func (nokiaPhone NokiaPhone)call() {
+	fmt.Println("I am Nokia, I can call you!")
+}
+
+type IPhone struct {
+
+}
+
+func (iPhone IPhone) call()  {
+	fmt.Println("I am iPhone, I can call you!")
+}
+
+	var phone Phone
+	phone = new(NokiaPhone)
+	phone.call()
+
+	phone = new(IPhone)
+	phone.call()
+}
+
+{
+	var sum int = 17
+	var count int = 5
+	var mean float32
+
+	mean = float32(sum) / float32(count)
+	fmt.Printf("mean 的值为：%f\n", mean)
+}
+
+{
+func Factorial(n uint64)(result uint64)  {
+	if n > 0 {
+		result = n * Factorial(n-1)
+		return result
+	}
+	return 1
+}
+
+	var i int = 15
+	fmt.Printf("%d 的阶乘是 %d\n", i, Factorial(uint64(i)))
+}
+
+{
+	countryCapitalMap := map[string]string{"France": "Paris", "Italy": "Rome", "Japan":"Tokyo", "India":"New delhi"}
+	fmt.Println("原始地图")
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+
+	delete(countryCapitalMap, "France")
+	fmt.Println("法国条目被删除")
+	fmt.Println("删除元素后地图")
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+}
+
+{
+	var countryCapitalMap map[string]string
+	countryCapitalMap = make(map[string]string)
+	countryCapitalMap["France"] = "巴黎"
+	countryCapitalMap["Italy"] = "罗马"
+	countryCapitalMap["Japan"] = "东京"
+	countryCapitalMap["India"] = "新德里"
+
+	for country := range countryCapitalMap {
+		fmt.Println(country, "首都是", countryCapitalMap[country])
+	}
+
+	capital, ok := countryCapitalMap["American"]
+	if ok {
+		fmt.Println("American 的首都是", capital)
+	} else {
+		fmt.Println("American 的首都不存在")
+	}
+}
+
+{
+	nums := []int{2, 3, 4}
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	fmt.Println("sum:", sum)
+	for i, num := range nums {
+		if num == 3 {
+			fmt.Println("index:", i)
+		}
+	}
+	kvs := map[string]string{"a": "apple", "b": "banana"}
+	for k, v := range kvs {
+		fmt.Printf("%s -> %s\n", k, v)
+	}
+
+	for i, c := range "go" {
+		fmt.Println(i, c)
+	}
+}
+
+{
+func printSlice(x []int)  {
+	fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x)
+}
+
+	var numbers []int
+	printSlice(numbers)
+
+	numbers = append(numbers, 0)
+	printSlice(numbers)
+
+	numbers = append(numbers, 1)
+	printSlice(numbers)
+
+	numbers = append(numbers, 2, 3, 4)
+	printSlice(numbers)
+
+	numbers1 := make([]int, len(numbers), (cap(numbers) * 2))
+
+	copy(numbers1, numbers)
+	printSlice(numbers1)
+}
+
+{
+
+
+	numbers := []int{0,1,2,3,4,5,6,7,8}
+	printSlice(numbers)
+
+	fmt.Println("numbers ==", numbers)
+	fmt.Println("numbers[1:4] ==", numbers[1:4])
+	fmt.Println("numbers[:3] ==", numbers[:3])
+	fmt.Println("numbers[4:] ==", numbers[4:])
+
+	numbers1 := make([]int, 0, 5)
+	printSlice(numbers1)
+
+	number2 := numbers[:2]
+	printSlice(number2)
+
+	number3 := numbers[2:5]
+	printSlice(number3)
+
+}
+
+{
+	var numbers []int
+	printSlice(numbers)
+
+	if numbers == nil {
+		fmt.Printf("切处是空的")
+	}
+}
+
+{
+func main() {
+	var numbers = make([]int, 3, 5)
+	printSlice(numbers)
+
+}
+
+	fmt.Printf("len=%d cap=%d slice=%v\n", len(x), cap(x), x)
+}
+
+{
+type Rect struct {
+	x, y float64
+	width, height float64
+}
+
+func (r *Rect) Area() float64 {
+	return r.width * r.height
+}
+
+	rect := Rect{1, 2, 3, 4}
+	fmt.Println(rect.Area())
+}
+
+{
 type Books struct {
 	title string
 	author string
@@ -9,7 +256,33 @@ type Books struct {
 	book_id int
 }
 
-func main() {
+func changeBook(book *Books) {
+	book.title = "book1_change"
+}
+
+	var book1 Books
+	book1.title = "book1"
+	book1.author = "zuozhe"
+	book1.book_id = 1
+	changeBook(&book1)
+	fmt.Println(book1)
+}
+
+{
+type Books struct {
+	title string
+	author string
+	subject string
+	book_id int
+}
+
+func printBook( book *Books)  {
+	fmt.Printf("Book title : %s\n", book.title)
+	fmt.Printf("Book author : %s\n", book.author)
+	fmt.Printf("Book subject : %s\n", book.subject)
+	fmt.Printf("Book book_id : %d\n", book.book_id)
+}
+
 	var Book1 Books
 	var Book2 Books
 
@@ -23,18 +296,10 @@ func main() {
 	Book2.subject = "Python 语言教程"
 	Book2.book_id = 6495700
 
-	printBook(Book1)
-	printBook(Book2)
+	printBook(&Book1)
+	printBook(&Book2)
 }
 
-func printBook( book Books)  {
-	fmt.Printf("Book title : %s\n", book.title)
-	fmt.Printf("Book author : %s\n", book.author)
-	fmt.Printf("Book subject : %s\n", book.subject)
-	fmt.Printf("Book book_id : %d\n", book.book_id)
-}
-
-/*
 {
 func printBook( book Books)  {
 	fmt.Printf("Book title : %s\n", book.title)
