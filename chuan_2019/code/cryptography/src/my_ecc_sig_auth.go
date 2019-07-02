@@ -19,7 +19,7 @@ func main()  {
 	fmt.Println(bl)
 }
 
-// 秘钥对 的生成，并保存到磁盘
+// 秘钥对 的生成，并保存到磁盘·
 func GenerateEccKey()  {
 	// 1. 使用ecdsa生成密钥对
 	privateKey, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
