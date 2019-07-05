@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"time"
 )
@@ -58,31 +57,32 @@ func Uint64ToByte(num uint64) []byte  {
 	return buffer.Bytes()
 }
 
-// 3. 生成哈希
-func (block *Block)SetHash()  {
-	tmp := [][]byte{
-		Uint64ToByte(block.Version),
-		block.PrevHash,
-		block.MerkelRoot,
-		Uint64ToByte(block.TimeStamp),
-		Uint64ToByte(block.Difficulty),
-		Uint64ToByte(block.Nonce),
-		block.Data,
-	}
-	blockInfo := bytes.Join(tmp, []byte{})
-	hash := sha256.Sum256(blockInfo)
-	block.Hash = hash[:]
 
-	/*
-	hashBlock := sha256.New()
-	hashBlock.Write(Uint64ToByte(block.Version))
-	hashBlock.Write(block.PrevHash)
-	hashBlock.Write(block.MerkelRoot)
-	hashBlock.Write(Uint64ToByte(block.TimeStamp))
-	hashBlock.Write(Uint64ToByte(block.Difficulty))
-	hashBlock.Write(Uint64ToByte(block.Nonce))
-	hashBlock.Write(block.Data)
-	// 2. sha256
-	block.Hash = hashBlock.Sum(nil)
-	 */
-}
+//// 3. 生成哈希
+//func (block *Block)SetHash()  {
+//	tmp := [][]byte{
+//		Uint64ToByte(block.Version),
+//		block.PrevHash,
+//		block.MerkelRoot,
+//		Uint64ToByte(block.TimeStamp),
+//		Uint64ToByte(block.Difficulty),
+//		Uint64ToByte(block.Nonce),
+//		block.Data,
+//	}
+//	blockInfo := bytes.Join(tmp, []byte{})
+//	hash := sha256.Sum256(blockInfo)
+//	block.Hash = hash[:]
+//
+//
+//	hashBlock := sha256.New()
+//	hashBlock.Write(Uint64ToByte(block.Version))
+//	hashBlock.Write(block.PrevHash)
+//	hashBlock.Write(block.MerkelRoot)
+//	hashBlock.Write(Uint64ToByte(block.TimeStamp))
+//	hashBlock.Write(Uint64ToByte(block.Difficulty))
+//	hashBlock.Write(Uint64ToByte(block.Nonce))
+//	hashBlock.Write(block.Data)
+//	// 2. sha256
+//	block.Hash = hashBlock.Sum(nil)
+//
+//}
