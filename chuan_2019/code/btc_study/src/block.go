@@ -3,6 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/gob"
+	"fmt"
+	"log"
 	"time"
 )
 
@@ -57,8 +60,38 @@ func Uint64ToByte(num uint64) []byte  {
 	return buffer.Bytes()
 }
 
-func (block *Block) toByte() []byte  {
-	return []byte{}
+//序列化
+func (block *Block) Serialize() []byte  {
+	var buffer bytes.Buffer
+	// 使用gob进行序列化
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(&block)
+	if err != nil {
+		log.Panic("编码错误")
+	}
+	return buffer.Bytes()
+}
+//反序列化
+func (block *Block) Deserialize(data []byte) error {
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(block)
+	if err != nil {
+		log.Panic("解码出错")
+	}
+	return err
+}
+
+func (block *Block) Print()  {
+	fmt.Printf("=================================================\n")
+	fmt.Printf("版本号： %d\n", block.Version)
+	fmt.Printf("前区块哈希值: %x\n", block.PrevHash)
+	fmt.Printf("梅克尔根: %x\n", block.MerkelRoot)
+	fmt.Printf("时间戳: %d\n", block.TimeStamp)
+	fmt.Printf("难度值: %d\n", block.Difficulty)
+	fmt.Printf("随机值：%d\n", block.Nonce)
+	fmt.Printf("当前区块哈希值: %x\n", block.Hash)
+	fmt.Printf("交易数据: %s\n", block.Data)
+	fmt.Printf("=================================================\n")
 }
 
 //// 3. 生成哈希

@@ -18,7 +18,7 @@ func NewProofOfWork(block *Block) *ProofOfWork  {
 	}
 
 	// 我们指定的难度值， 现在是一个string类型，需要进行转换
-	targetStr := "000001bf474e8f1f46797bcb4d3454832fd8ef867595889dbfa5b733944d9280"
+	targetStr := "000010bf474e8f1f46797bcb4d3454832fd8ef867595889dbfa5b733944d9280"
 	tmpInt := big.Int{}
 	tmpInt.SetString(targetStr, 16)
 	pow.target = &tmpInt
