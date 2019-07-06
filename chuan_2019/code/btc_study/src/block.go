@@ -57,6 +57,9 @@ func Uint64ToByte(num uint64) []byte  {
 	return buffer.Bytes()
 }
 
+func (block *Block) toByte() []byte  {
+	return []byte{}
+}
 
 //// 3. 生成哈希
 //func (block *Block)SetHash()  {

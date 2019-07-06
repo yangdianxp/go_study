@@ -14,6 +14,7 @@ func main()  {
 	if err != nil {
 		log.Panic(err)
 	}
+	defer db.Close()
 
 	db.Update(func(tx *bolt.Tx) error {
 		// 2. 找到抽屉bucket
@@ -31,4 +32,16 @@ func main()  {
 		return nil
 	})
 	// 4. 读数据
+	db.View(func(tx *bolt.Tx) error {
+		// 1. 找到抽屉
+		bucket := tx.Bucket([]byte("b1"))
+		if bucket == nil {
+			log.Panic("bucket b1 不应该为空，请检查！！！")
+		}
+		// 2. 直接读取数据
+		v1 := bucket.Get([]byte("11111"))
+		v2 := bucket.Get([]byte("22222"))
+		fmt.Printf("v1:%s v2:%s", v1, v2)
+		return nil
+	})
 }
