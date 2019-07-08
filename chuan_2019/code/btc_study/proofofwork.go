@@ -30,7 +30,7 @@ func (pow *ProofOfWork)Run() ([]byte, uint64)  {
 	var nonce uint64
 	for {
 		//1. 拼装数据 （区块的数据， 还有不断变化的随机数
-		
+
 	}
 
 	return []byte("HelloWorld"), 10
