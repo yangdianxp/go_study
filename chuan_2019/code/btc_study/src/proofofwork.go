@@ -46,8 +46,10 @@ func (pow *ProofOfWork)Run() ([]byte, uint64)  {
 			Uint64ToByte(block.TimeStamp),
 			Uint64ToByte(block.Difficulty),
 			Uint64ToByte(nonce),
-			block.Data,
+			// 只对区块头做哈希值，区块体通过MerkeRoot产生影响
+			// block.Data,
 		}
+
 		blockInfo := bytes.Join(tmp, []byte{})
 		// 2. 做哈希运算
 		hash = sha256.Sum256(blockInfo)

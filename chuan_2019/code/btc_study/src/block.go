@@ -27,13 +27,15 @@ type Block struct {
 	// a. 当前区块哈希  正常比特币区块中没有当前区块的哈希，我们为了实现方便，简化
 	Hash []byte
 	// b. 数据
-	Data []byte
+	// Data []byte
+	// 真实的交易数组
+	Transactions []*Transaction
 }
 
 //
 
 // 2. 创建区块
-func NewBlock(data string, prevBlockHash []byte) *Block  {
+func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block  {
 	block := Block{
 		Version: 00,
 		PrevHash: prevBlockHash,
@@ -42,12 +44,13 @@ func NewBlock(data string, prevBlockHash []byte) *Block  {
 		Difficulty: 0,
 		Nonce: 0,
 		Hash: []byte{},		// 先填空，后面再计算
-		Data: []byte(data),
+		Transactions: txs,
 	}
 	pow := NewProofOfWork(&block)
 	hash, nonce := pow.Run()
 	block.Hash = hash
 	block.Nonce = nonce
+	block.MerkelRoot = block.MakeMerkelRoot()
 	return &block
 }
 
@@ -82,7 +85,7 @@ func (block *Block) Deserialize(data []byte) error {
 }
 
 func (block *Block) Print()  {
-	fmt.Printf("=================================================\n")
+	fmt.Printf("======================================================================\n")
 	fmt.Printf("版本号： %d\n", block.Version)
 	fmt.Printf("前区块哈希值: %x\n", block.PrevHash)
 	fmt.Printf("梅克尔根: %x\n", block.MerkelRoot)
@@ -90,8 +93,25 @@ func (block *Block) Print()  {
 	fmt.Printf("难度值: %d\n", block.Difficulty)
 	fmt.Printf("随机值：%d\n", block.Nonce)
 	fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-	fmt.Printf("交易数据: %s\n", block.Data)
-	fmt.Printf("=================================================\n")
+	fmt.Printf("区块数据: %s", block.Transactions[0].TXInputs[0].Sig)
+	fmt.Printf("交易：\n")
+	for _, tx := range block.Transactions {
+		fmt.Printf("********************************\n")
+		fmt.Printf("交易id:%x\n", string(tx.TXID))
+		fmt.Printf("交易输入:\n")
+		for _, input := range tx.TXInputs {
+			fmt.Printf("输入交易id:%x  ", input.TXid)
+			fmt.Printf("输入交易index:%d  ", input.Index)
+			fmt.Printf("输入交易解锁脚本:%s\n", input.Sig)
+		}
+		fmt.Printf("交易输出:\n")
+		for _, output := range tx.TXOutputs {
+			fmt.Printf("输出交易转账金额:%f  ", output.Value)
+			fmt.Printf("输出交易锁定脚本:%s\n", output.PubKeyHash)
+		}
+		fmt.Printf("********************************\n")
+	}
+	fmt.Printf("======================================================================\n")
 }
 
 //// 3. 生成哈希
@@ -122,3 +142,8 @@ func (block *Block) Print()  {
 //	block.Hash = hashBlock.Sum(nil)
 //
 //}
+
+// 模拟梅克尔根，只是对交易的数据做简单的拼接， 不做二叉树
+func (block *Block)MakeMerkelRoot() []byte  {
+	return []byte{}
+}
