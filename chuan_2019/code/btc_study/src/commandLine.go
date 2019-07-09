@@ -2,10 +2,6 @@ package main
 
 import "fmt"
 
-func (cli *CLI) AddBlock(data string)  {
-	//cli.bc.AddBlock(data)
-}
-
 func (cli *CLI) PrintBlockChain()  {
 	bc := cli.bc
 	it := bc.NewIterator()
