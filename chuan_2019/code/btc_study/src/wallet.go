@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"log"
 )
 
@@ -29,3 +31,10 @@ func NewWallet() *Wallet {
 }
 
 // 生成地址
+func (w *Wallet)NewAddress() string {
+	pubKey := w.PubKey
+	hash := sha256.Sum256(pubKey)
+	rip160hasher := crypto.RIPEMD160.New()
+	rip160hasher.Write(hash)
+	rip160hasher.Sum(nil)
+}
