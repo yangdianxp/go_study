@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"encoding/gob"
 	"fmt"
+	"github.com/btcsuite/btcutil/base58"
 	"io/ioutil"
 	"log"
 	"os"
@@ -82,4 +83,28 @@ func (ws *Wallets)GetAllAddresses() []string {
 		addresses = append(addresses, address)
 	}
 	return addresses
+}
+
+//通过地址返回公钥hash
+func GetPubKeyFromAddress(address string) []byte {
+	addressByte := base58.Decode(address)  // 25字节
+	pubKeyHash := addressByte[1:len(addressByte)-4]
+	return pubKeyHash
+}
+
+func IsValidAddress(address string) bool {
+	// 1. 解码
+	addressByte := base58.Decode(address)
+	if len(addressByte) < 4 {
+		return false
+	}
+	payLoad := addressByte[:len(addressByte) - 4]
+	checksum1 := addressByte[len(addressByte) - 4:]
+	checksum2 := CheckSum(payLoad)
+	fmt.Printf("checksum1:%x\n", checksum1)
+	fmt.Printf("checksum2:%x\n", checksum2)
+	// 2. 取数据
+	// 3. 做checksum函数
+	// 4. 比较
+	return bytes.Equal(checksum1, checksum2)
 }

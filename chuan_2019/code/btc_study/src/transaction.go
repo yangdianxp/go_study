@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
-	"github.com/btcsuite/btcutil/base58"
 	"log"
 )
 
@@ -41,10 +41,7 @@ type TXOutput struct {
 
 // 由于现在存储的字段是地址的公钥哈希，所以无法直接创建TXOutput
 func (output *TXOutput)Lock(address string) {
-	// 1. 解码
-	// 2. 截取出公钥哈希，去除version（1字节）, 去除校验码（4字节）
-	addressByte := base58.Decode(address)  // 25字节
-	pubKeyHash := addressByte[1:len(addressByte)-4]
+	pubKeyHash := GetPubKeyFromAddress(address)
 	output.PubKeyHash = pubKeyHash
 }
 
@@ -119,7 +116,7 @@ func NewTransaction(from, to string, amount float64, bc* BlockChain) *Transactio
 		return nil
 	}
 	pubKey := wallet.PubKey
-	// privateKey := wallet.Private  // 稍后再用
+	privateKey := wallet.Private  // 稍后再用
 	pubKeyHash := HashPubKey(pubKey)
 
 	utxos, resValue := bc.FindNeedUTXOs(pubKeyHash, amount)
@@ -144,5 +141,16 @@ func NewTransaction(from, to string, amount float64, bc* BlockChain) *Transactio
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
+
+	// 签名， 交易创建的最后进行签名
+	prevTXs := make(map[string]Transaction)
+
+	tx.Sign(*privateKey, prevTXs)
+
 	return &tx
+}
+
+// 签名的具体实现, 参数为：私钥， inputs里面所有引用的交易的结构，map[string]Transaction
+func (tx *Transaction) Sign(privateKey ecdsa.PrivateKey, prevTxs map[string]Transaction)  {
+	//具体签名的动作先不管，稍后继续
 }

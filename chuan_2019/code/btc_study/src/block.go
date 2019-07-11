@@ -109,7 +109,7 @@ func (block *Block) Print()  {
 		fmt.Printf("交易输出:\n")
 		for _, output := range tx.TXOutputs {
 			fmt.Printf("输出交易转账金额:%f  ", output.Value)
-			fmt.Printf("输出交易锁定脚本:%s\n", output.PubKeyHash)
+			fmt.Printf("输出交易锁定脚本:%x\n", output.PubKeyHash)
 		}
 		fmt.Printf("********************************\n")
 	}
