@@ -95,7 +95,7 @@ func (block *Block) Print()  {
 	fmt.Printf("难度值: %d\n", block.Difficulty)
 	fmt.Printf("随机值：%d\n", block.Nonce)
 	fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-	fmt.Printf("区块数据: %s", block.Transactions[0].TXInputs[0].Sig)
+	fmt.Printf("区块数据: %s", block.Transactions[0].TXInputs[0].PubKey)
 	fmt.Printf("交易：\n")
 	for _, tx := range block.Transactions {
 		fmt.Printf("********************************\n")
@@ -104,7 +104,7 @@ func (block *Block) Print()  {
 		for _, input := range tx.TXInputs {
 			fmt.Printf("输入交易id:%x  ", input.TXid)
 			fmt.Printf("输入交易index:%d  ", input.Index)
-			fmt.Printf("输入交易解锁脚本:%s\n", input.Sig)
+			fmt.Printf("输入交易解锁脚本:%x\n", input.PubKey)
 		}
 		fmt.Printf("交易输出:\n")
 		for _, output := range tx.TXOutputs {
