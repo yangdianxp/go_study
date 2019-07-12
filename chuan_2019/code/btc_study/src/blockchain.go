@@ -3,6 +3,8 @@ package main
 import (
 	"bolt"
 	"bytes"
+	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -54,6 +56,13 @@ func GenesisBlock(address string) *Block {
 
 //6. 添加区块
 func (bc *BlockChain)AddBlock(txs []*Transaction) {
+	for _, tx := range txs {
+		if !bc.VerifyTransaction(tx) {
+			fmt.Printf("矿工发现无效交易\n")
+			return
+		}
+	}
+
 	db := bc.db
 	lastHash := bc.tail
 	// a. 创建新的区块
@@ -174,4 +183,65 @@ func (bc *BlockChain)FindUTXOTransactions(senderPubKeyHash []byte) []*Transactio
 		}
 	}
 	return txs
+}
+
+func (bc *BlockChain)FindTransactionByTXid(id []byte) (Transaction, error) {
+	// 1. 遍历区块链
+	// 2. 遍历交易
+	// 3. 比较交易， 找到了直接退出
+	// 4. 如果没找到，返回空的Trans, 同时返回错误码
+	it := bc.NewIterator()
+	for {
+		block := it.Next()
+		for _, tx := range block.Transactions {
+			if bytes.Equal(tx.TXID, id) {
+				return *tx, nil
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+	return Transaction{}, errors.New("无效的交易id, 请检查")
+}
+
+func (bc *BlockChain)SignTransaction(tx *Transaction, privateKey *ecdsa.PrivateKey)  {
+	// 签名， 交易创建的最后进行签名
+	prevTXs := make(map[string]Transaction)
+	// 找到所有引用的交易
+	// 1. 根据inputs来找，有多少input,就遍历多少次
+	// 2. 找到目标交易，（根据TXid来找）
+	// 3. 添加到prevTXs里面
+	for _, input := range tx.TXInputs {
+		// 根据id查找交易本身，需要遍历整个区块链
+		tx, err := bc.FindTransactionByTXid(input.TXid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[string(input.TXid)] = tx
+	}
+
+	tx.Sign(privateKey, prevTXs)
+}
+
+func (bc *BlockChain)VerifyTransaction(tx *Transaction) bool {
+	if tx.IsCoinbase() {
+		return true
+	}
+	// 签名， 交易创建的最后进行签名
+	prevTXs := make(map[string]Transaction)
+	// 找到所有引用的交易
+	// 1. 根据inputs来找，有多少input,就遍历多少次
+	// 2. 找到目标交易，（根据TXid来找）
+	// 3. 添加到prevTXs里面
+	for _, input := range tx.TXInputs {
+		// 根据id查找交易本身，需要遍历整个区块链
+		tx, err := bc.FindTransactionByTXid(input.TXid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[string(input.TXid)] = tx
+	}
+
+	return tx.Verify(prevTXs)
 }

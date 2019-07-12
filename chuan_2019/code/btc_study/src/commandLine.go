@@ -44,7 +44,7 @@ func (cli *CLI) Send(from, to string, amount float64, miner, data string) {
 		fmt.Printf("地址无效：%s\n", to)
 		return
 	}
-	if !IsValidAddress(to) {
+	if !IsValidAddress(miner) {
 		fmt.Printf("地址无效：%s\n", miner)
 		return
 	}
